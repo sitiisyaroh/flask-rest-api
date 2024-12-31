@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+    <style>
+        /* General Styles */
+        body { 
+            font-family: Arial, sans-serif;
+            background-color: #F9F5F6;  /* Light pink */
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container { 
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h2, h3 { 
+            color: #F2BED1;  /* Deep pink */
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* Form Styles */
+        .form-group { 
+            margin-bottom: 15px;
+        }
+
+        input, button { 
+            padding: 12px;
+            width: 100%;
+            margin-top: 5px;
+            border-radius: 6px;
+            border: 1px solid #F2BED1;  /* Light pink */
+            font-size: 14px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #F2BED1;  /* Deep pink */
+            box-shadow: 0 0 4px rgba(242, 190, 209, 0.3);
+        }
+
+        button { 
+            background-color: #F2BED1;  /* Deep pink */
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover { 
+            background-color: #F8E8EE;  /* Pale pink */
+        }
+
+        /* Table Styles */
+        table { 
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td { 
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #FDCEDF;  /* Light pink */
+        }
+
+        th { 
+            background-color: #FDCEDF;  /* Light pink */
+            color: #fff;
+        }
+
+        td { 
+            background-color: #F9F5F6;  /* Light pink */
+        }
+
+        /* Button Styles */
+        .action-btns button { 
+            margin: 0 5px;
+            padding: 8px 12px;
+            font-size: 12px;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .action-btns button:first-child { 
+            background-color: #FDCEDF;  /* Light pink */
+            color: #333;
+        }
+
+        .action-btns button:last-child { 
+            background-color: #F8E8EE;  /* Pale pink */
+            color: #fff;
+        }
+
+        .action-btns button:first-child:hover { 
+            background-color: #F2BED1;  /* Deep pink */
+        }
+
+        .action-btns button:last-child:hover { 
+            background-color: #F2BED1;  /* Deep pink */
+        }
+
+        /* Search and Form Buttons */
+        #searchName, #userForm button { 
+            background-color: #F8E8EE;  /* Pale pink */
+            border: 1px solid #F2BED1;  /* Deep pink */
+        }
+
+        #searchName:focus, #userForm button:focus { 
+            border-color: #F2BED1;  /* Deep pink */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>User Management</h2>
+        <div class="form-group">
+            <input type="text" id="searchName" placeholder="Search by Name">
+            <button onclick="searchUser()">Search</button>
+            <button onclick="loadUsers()">Clear Search</button>
+        </div>
+
+        <h3>Add User</h3>
+        <form id="userForm">
+            <div class="form-group">
+                <input type="text" id="name" placeholder="Name" required>
+            </div>
+            <div class="form-group">
+                <input type="email" id="email" placeholder="Email" required>
+            </div>
+            <div class="form-group">
+                <input type="text" id="jabatan" placeholder="Jabatan">
+            </div>
+            <div class="form-group">
+                <input type="number" id="usia" placeholder="Usia">
+            </div>
+            <div class="form-group">
+                <input type="text" id="kota" placeholder="Kota">
+            </div>
+            <button type="button" onclick="addUser()">Add User</button>
+        </form>
+
+        <h3>User List</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Jabatan</th>
+                    <th>Usia</th>
+                    <th>Kota</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const apiUrl = '/api/users/';
+
+        // Load all users
+        async function loadUsers() {
+            const response = await fetch(apiUrl);
+            const users = await response.json();
+            displayUsers(users);
+        }
+
+        // Display users in the table
+        function displayUsers(users) {
+            const userTableBody = document.getElementById('userTableBody');
+            userTableBody.innerHTML = '';
+            users.forEach(user => {
+                userTableBody.innerHTML += `
+                    <tr>
+                        <td>${user.id}</td>
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                        <td>${user.jabatan || ''}</td>
+                        <td>${user.usia || ''}</td>
+                        <td>${user.kota || ''}</td>
+                        <td class="action-btns">
+                            <button onclick="editUser(${user.id})">Edit</button>
+                            <button onclick="deleteUser(${user.id})">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Add a new user
+        async function addUser() {
+            const user = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                jabatan: document.getElementById('jabatan').value,
+                usia: parseInt(document.getElementById('usia').value),
+                kota: document.getElementById('kota').value
+            };
+            await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(user)
+            });
+            loadUsers();
+            document.getElementById('userForm').reset();
+        }
+
+        // Search users by name
+        async function searchUser() {
+            const name = document.getElementById('searchName').value;
+            const response = await fetch(`/api/users/name/${name}`);
+            const users = await response.json();
+            displayUsers(users);
+        }
+
+        // Redirect to the edit page
+        function editUser(id) {
+            window.location.href = `/edit.html?id=${id}`;
+        }
+
+        // Delete a user
+        async function deleteUser(id) {
+            await fetch(`/api/users/id/${id}`, { method: 'DELETE' });
+            loadUsers();
+        }
+
+        // Load users initially
+        loadUsers();
+    </script>
+</body>
+</html>

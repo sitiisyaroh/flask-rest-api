@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit User</title>
+    <style>
+        /* General Styles */
+        body { 
+            font-family: Arial, sans-serif;
+            background-color: #F9F5F6;  /* Light pink */
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container { 
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 { 
+            color: #F2BED1;  /* Deep pink */
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* Form Styles */
+        .form-group { 
+            margin-bottom: 15px;
+        }
+
+        input, button { 
+            padding: 12px;
+            width: 100%;
+            margin-top: 5px;
+            border-radius: 6px;
+            border: 1px solid #FDCEDF;  /* Light pink */
+            font-size: 14px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #F2BED1;  /* Deep pink */
+            box-shadow: 0 0 4px rgba(242, 190, 209, 0.3);
+        }
+
+        button { 
+            background-color: #F2BED1;  /* Deep pink */
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover { 
+            background-color: #F8E8EE;  /* Pale pink */
+        }
+
+        /* Button Styles */
+        button:focus {
+            border-color: #F2BED1;  /* Deep pink */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Edit User</h2>
+        <form id="editUserForm">
+            <div class="form-group">
+                <input type="text" id="name" placeholder="Name" required autocomplete="name">
+            </div>
+            <div class="form-group">
+                <input type="email" id="email" placeholder="Email" required autocomplete="email">
+            </div>
+            <div class="form-group">
+                <input type="text" id="jabatan" placeholder="Jabatan" autocomplete="jabatan">
+            </div>
+            <div class="form-group">
+                <input type="number" id="usia" placeholder="Usia" autocomplete="usia">
+            </div>
+            <div class="form-group">
+                <input type="text" id="kota" placeholder="Kota" autocomplete="kota">
+            </div>
+            <button type="button" onclick="updateUser()">Update User</button>
+        </form>
+    </div>
+
+    <script>
+        const apiUrl = '/api/users/id/';
+
+        // Load user data based on the query parameter ID
+        async function loadUserData() {
+            const params = new URLSearchParams(window.location.search);
+            const userId = params.get('id');
+
+            const response = await fetch(`${apiUrl}${userId}`);
+            const user = await response.json();
+
+            document.getElementById('name').value = user.name;
+            document.getElementById('email').value = user.email;
+            document.getElementById('jabatan').value = user.jabatan || '';
+            document.getElementById('usia').value = user.usia || '';
+            document.getElementById('kota').value = user.kota || '';
+        }
+
+        // Update user
+        async function updateUser() {
+            const params = new URLSearchParams(window.location.search);
+            const userId = params.get('id');
+
+            const user = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                jabatan: document.getElementById('jabatan').value,
+                usia: parseInt(document.getElementById('usia').value),
+                kota: document.getElementById('kota').value
+            };
+
+            await fetch(`${apiUrl}${userId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(user)
+            });
+            window.location.href = '/index.html'; // Redirect back to the user list
+        }
+
+        // Load user data on page load
+        loadUserData();
+    </script>
+</body>
+</html>
